@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
@@ -7,7 +8,9 @@ export default function Home() {
       <p className="text-muted-foreground max-w-md text-center">
         Rate and discuss books, movies, and TV with your friends.
       </p>
-      <Button>Coming soon</Button>
+      <Button nativeButton={false} render={<Link href="/search" />}>
+        Search
+      </Button>
     </div>
   );
 }
