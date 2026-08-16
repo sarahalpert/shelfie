@@ -45,7 +45,38 @@ export async function saveLog({
         { onConflict: "log_id" },
       );
     if (reviewError) throw new Error(reviewError.message);
+  } else {
+    const { error: deleteError } = await supabase
+      .from("review")
+      .delete()
+      .eq("log_id", log.id);
+    if (deleteError) throw new Error(deleteError.message);
   }
+
+  revalidatePath(path);
+}
+
+export async function deleteLogByMediaItem({
+  mediaItemId,
+  path,
+}: {
+  mediaItemId: string;
+  path: string;
+}) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("Not logged in");
+
+  const { error } = await supabase
+    .from("log")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("media_item_id", mediaItemId);
+
+  if (error) throw new Error(error.message);
 
   revalidatePath(path);
 }

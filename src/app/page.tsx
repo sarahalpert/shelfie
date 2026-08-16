@@ -165,11 +165,13 @@ export default async function Home({
   const { data: myLogs } = mediaItemIds.length
     ? await supabase
         .from("log")
-        .select("media_item_id")
+        .select("media_item_id, rating")
         .eq("user_id", user.id)
         .in("media_item_id", mediaItemIds)
     : { data: [] };
-  const myShelfIds = new Set((myLogs ?? []).map((l) => l.media_item_id));
+  const myShelfRatingByMediaItem = new Map(
+    (myLogs ?? []).map((l) => [l.media_item_id, l.rating]),
+  );
 
   const entries: FeedEntry[] = logs.map((log) => ({
     id: log.id,
@@ -181,7 +183,10 @@ export default async function Home({
     mediaItemId: log.media_item.id,
     media_item: log.media_item,
     mediaHref: buildMediaHref(log.media_item),
-    isOnMyShelf: myShelfIds.has(log.media_item.id),
+    isOnMyShelf: myShelfRatingByMediaItem.has(log.media_item.id),
+    myShelfHasRating: Boolean(
+      myShelfRatingByMediaItem.get(log.media_item.id),
+    ),
     isLiked: likedByViewer.has(log.id),
     likeCount: likeCountByLog.get(log.id) ?? 0,
     comments: commentsByLog.get(log.id) ?? [],

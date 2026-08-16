@@ -4,24 +4,10 @@ import { MediaItemData } from "@/lib/media/types";
 import { PersonRow, type PersonResult } from "@/components/people-results";
 import type { FilterValue } from "@/lib/media/filters";
 
-function detailHref(item: MediaItemData): string {
-  if (item.type !== "book") {
-    return `/media/${item.type}/${item.externalId}`;
-  }
-
-  const params = new URLSearchParams({ title: item.title });
-  if (item.year) params.set("year", String(item.year));
-  if (item.imageUrl) params.set("image", item.imageUrl);
-  const authors = item.metadata.authors as string[] | undefined;
-  if (authors?.length) params.set("authors", authors.join(", "));
-
-  return `/media/book/${item.externalId}?${params.toString()}`;
-}
-
 function ResultCard({ item }: { item: MediaItemData }) {
   return (
     <Link
-      href={detailHref(item)}
+      href={`/media/${item.type}/${item.externalId}`}
       className="bg-card flex gap-4 rounded-2xl p-3 transition-colors hover:bg-accent"
     >
       <div className="bg-muted h-24 w-16 shrink-0 overflow-hidden rounded-lg">

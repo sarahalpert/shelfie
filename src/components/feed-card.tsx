@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { AddToShelfButton } from "@/components/add-to-shelf-button";
 import { FeedActions, type CommentData } from "@/components/feed-actions";
+import { StarRating } from "@/components/star-rating";
 import { statusVerbPhrase, type LogStatus } from "@/lib/media/status-labels";
 import type { MediaType } from "@/lib/media/types";
 
@@ -22,6 +23,7 @@ export type FeedEntry = {
   };
   mediaHref: string;
   isOnMyShelf: boolean;
+  myShelfHasRating: boolean;
   isLiked: boolean;
   likeCount: number;
   comments: CommentData[];
@@ -59,6 +61,8 @@ export function FeedCard({
           <AddToShelfButton
             mediaItemId={entry.mediaItemId}
             initialIsOnShelf={entry.isOnMyShelf}
+            hasRating={entry.myShelfHasRating}
+            mediaHref={entry.mediaHref}
             path="/"
           />
         )}
@@ -83,14 +87,7 @@ export function FeedCard({
           <span className="font-medium leading-tight">
             {entry.media_item.title}
           </span>
-          {entry.rating && (
-            <span className="text-primary text-sm">
-              {"★".repeat(entry.rating)}
-              <span className="text-muted-foreground/30">
-                {"★".repeat(5 - entry.rating)}
-              </span>
-            </span>
-          )}
+          {entry.rating && <StarRating rating={entry.rating} />}
         </div>
       </Link>
 

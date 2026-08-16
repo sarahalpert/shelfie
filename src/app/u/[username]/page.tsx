@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
+import { EditProfileForm } from "@/components/edit-profile-form";
+import { StarRating } from "@/components/star-rating";
 import { statusLabel } from "@/lib/media/status-labels";
 import type { MediaType } from "@/lib/media/types";
 
@@ -101,6 +103,14 @@ export default async function ProfilePage({
         )}
       </div>
 
+      {user && user.id === profile.id && (
+        <EditProfileForm
+          initialDisplayName={profile.display_name}
+          initialBio={profile.bio}
+          path={`/u/${profile.username}`}
+        />
+      )}
+
       {profile.bio && <p>{profile.bio}</p>}
 
       <div className="bg-card grid grid-cols-4 gap-2 rounded-2xl p-4">
@@ -156,8 +166,8 @@ export default async function ProfilePage({
                   {media.type}
                 </span>
                 <span className="font-medium">{media.title}</span>
+                {log.rating && <StarRating rating={log.rating} className="text-sm" />}
                 <span className="text-muted-foreground text-sm">
-                  {log.rating ? `${log.rating}★ · ` : ""}
                   {statusLabel(
                     log.status as "want" | "in_progress" | "done",
                     media.type as MediaType,
