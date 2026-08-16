@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
+import { AddToShelfButton } from "@/components/add-to-shelf-button";
 import { statusVerbPhrase, type LogStatus } from "@/lib/media/status-labels";
 import type { MediaType } from "@/lib/media/types";
 
@@ -11,6 +12,7 @@ export type FeedEntry = {
   created_at: string;
   reviewBody: string | null;
   user: { username: string; display_name: string | null };
+  mediaItemId: string;
   media_item: {
     title: string;
     type: string;
@@ -18,27 +20,44 @@ export type FeedEntry = {
     image_url: string | null;
   };
   mediaHref: string;
+  isOnMyShelf: boolean;
 };
 
-export function FeedCard({ entry }: { entry: FeedEntry }) {
+export function FeedCard({
+  entry,
+  showAddToShelf,
+}: {
+  entry: FeedEntry;
+  showAddToShelf: boolean;
+}) {
   return (
     <div className="bg-card flex flex-col gap-3 rounded-2xl p-4">
-      <div className="flex items-center gap-3">
-        <Avatar username={entry.user.username} size="sm" />
-        <div className="flex flex-col leading-tight">
-          <Link
-            href={`/u/${entry.user.username}`}
-            className="text-sm font-medium"
-          >
-            {entry.user.display_name ?? entry.user.username}
-          </Link>
-          <span className="text-muted-foreground text-xs">
-            {statusVerbPhrase(
-              entry.status as LogStatus,
-              entry.media_item.type as MediaType,
-            )}
-          </span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar username={entry.user.username} size="sm" />
+          <div className="flex flex-col leading-tight">
+            <Link
+              href={`/u/${entry.user.username}`}
+              className="text-sm font-medium"
+            >
+              {entry.user.display_name ?? entry.user.username}
+            </Link>
+            <span className="text-muted-foreground text-xs">
+              {statusVerbPhrase(
+                entry.status as LogStatus,
+                entry.media_item.type as MediaType,
+              )}
+            </span>
+          </div>
         </div>
+
+        {showAddToShelf && (
+          <AddToShelfButton
+            mediaItemId={entry.mediaItemId}
+            initialIsOnShelf={entry.isOnMyShelf}
+            path="/"
+          />
+        )}
       </div>
 
       <Link href={entry.mediaHref} className="flex gap-3">

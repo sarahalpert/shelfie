@@ -1,27 +1,10 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { FeedCard, type FeedEntry } from "@/components/feed-card";
+import { searchBooks } from "@/lib/media/openlibrary";
+import { searchMoviesAndTv } from "@/lib/media/tmdb";
 import { buildMediaHref } from "@/lib/media/href";
-import { Logo } from "@/components/logo";
-
-function MarketingHero() {
-  return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center gap-4 p-8 text-center">
-      <Logo size="lg" />
-      <p className="text-muted-foreground max-w-md">
-        Rate and discuss books, movies, and TV with your friends.
-      </p>
-      <Button
-        nativeButton={false}
-        render={<Link href="/search" />}
-        className="rounded-full"
-      >
-        Search
-      </Button>
-    </div>
-  );
-}
+import { HomeContent } from "@/components/home-content";
+import type { FeedEntry } from "@/components/feed-card";
+import type { PersonResult } from "@/components/people-results";
 
 type RawLogRow = {
   id: string;
@@ -30,6 +13,7 @@ type RawLogRow = {
   created_at: string;
   user: { username: string; display_name: string | null };
   media_item: {
+    id: string;
     type: string;
     external_id: string;
     title: string;
@@ -39,13 +23,77 @@ type RawLogRow = {
   };
 };
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q?.trim() ?? "";
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return <MarketingHero />;
+  // Search mode: fetch media + people results, skip the feed entirely.
+  if (query.length > 0) {
+    const searchResults = (
+      await Promise.all([searchBooks(query), searchMoviesAndTv(query)])
+    ).flat();
+
+    let people: PersonResult[] = [];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, username, display_name")
+      .ilike("username", `%${query}%`)
+      .limit(10);
+
+    const matches = (profiles ?? []).filter((p) => p.id !== user?.id);
+
+    let followingIds = new Set<string>();
+    if (user && matches.length) {
+      const { data: followRows } = await supabase
+        .from("follow")
+        .select("followee_id")
+        .eq("follower_id", user.id)
+        .in(
+          "followee_id",
+          matches.map((m) => m.id),
+        );
+      followingIds = new Set((followRows ?? []).map((f) => f.followee_id));
+    }
+
+    people = matches.map((p) => ({
+      id: p.id,
+      username: p.username,
+      displayName: p.display_name,
+      isFollowing: followingIds.has(p.id),
+    }));
+
+    return (
+      <HomeContent
+        query={query}
+        searchResults={searchResults}
+        people={people}
+        isLoggedIn={Boolean(user)}
+        feedEntries={[]}
+      />
+    );
+  }
+
+  // Feed mode (logged out users see a marketing blurb instead).
+  if (!user) {
+    return (
+      <HomeContent
+        query=""
+        searchResults={[]}
+        people={[]}
+        isLoggedIn={false}
+        feedEntries={[]}
+      />
+    );
+  }
 
   const { data: follows } = await supabase
     .from("follow")
@@ -59,7 +107,7 @@ export default async function Home() {
     const { data } = await supabase
       .from("log")
       .select(
-        "id, rating, status, created_at, user:user_id(username, display_name), media_item:media_item_id(type, external_id, title, year, image_url, metadata)",
+        "id, rating, status, created_at, user:user_id(username, display_name), media_item:media_item_id(id, type, external_id, title, year, image_url, metadata)",
       )
       .in("user_id", followeeIds)
       .order("created_at", { ascending: false })
@@ -70,12 +118,19 @@ export default async function Home() {
 
   const logIds = logs.map((l) => l.id);
   const { data: reviews } = logIds.length
-    ? await supabase
-        .from("review")
-        .select("log_id, body")
-        .in("log_id", logIds)
+    ? await supabase.from("review").select("log_id, body").in("log_id", logIds)
     : { data: [] };
   const reviewByLogId = new Map((reviews ?? []).map((r) => [r.log_id, r.body]));
+
+  const mediaItemIds = [...new Set(logs.map((l) => l.media_item.id))];
+  const { data: myLogs } = mediaItemIds.length
+    ? await supabase
+        .from("log")
+        .select("media_item_id")
+        .eq("user_id", user.id)
+        .in("media_item_id", mediaItemIds)
+    : { data: [] };
+  const myShelfIds = new Set((myLogs ?? []).map((l) => l.media_item_id));
 
   const entries: FeedEntry[] = logs.map((log) => ({
     id: log.id,
@@ -84,29 +139,19 @@ export default async function Home() {
     created_at: log.created_at,
     reviewBody: reviewByLogId.get(log.id) ?? null,
     user: log.user,
+    mediaItemId: log.media_item.id,
     media_item: log.media_item,
     mediaHref: buildMediaHref(log.media_item),
+    isOnMyShelf: myShelfIds.has(log.media_item.id),
   }));
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4 p-5">
-      <h1 className="font-heading text-2xl font-bold">Feed</h1>
-
-      {entries.length === 0 && (
-        <p className="text-muted-foreground">
-          Follow people to see what they&apos;re logging here.{" "}
-          <Link href="/search" className="text-primary underline">
-            Search
-          </Link>{" "}
-          for something to log yourself.
-        </p>
-      )}
-
-      <div className="flex flex-col gap-3">
-        {entries.map((entry) => (
-          <FeedCard key={entry.id} entry={entry} />
-        ))}
-      </div>
-    </div>
+    <HomeContent
+      query=""
+      searchResults={[]}
+      people={[]}
+      isLoggedIn
+      feedEntries={entries}
+    />
   );
 }

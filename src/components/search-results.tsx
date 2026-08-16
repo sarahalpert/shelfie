@@ -1,21 +1,8 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { MediaItemData, MediaType } from "@/lib/media/types";
+import { MediaItemData } from "@/lib/media/types";
 import { PersonRow, type PersonResult } from "@/components/people-results";
-
-type FilterValue = MediaType | "all" | "people";
-
-const FILTERS: { label: string; value: FilterValue }[] = [
-  { label: "All", value: "all" },
-  { label: "Books", value: "book" },
-  { label: "Films", value: "movie" },
-  { label: "Series", value: "tv" },
-  { label: "People", value: "people" },
-];
+import type { FilterValue } from "@/lib/media/filters";
 
 function detailHref(item: MediaItemData): string {
   if (item.type !== "book") {
@@ -66,14 +53,14 @@ export function SearchResults({
   people,
   isLoggedIn,
   query,
+  filter,
 }: {
   results: MediaItemData[];
   people: PersonResult[];
   isLoggedIn: boolean;
   query: string;
+  filter: FilterValue;
 }) {
-  const [filter, setFilter] = useState<FilterValue>("all");
-
   const filteredMedia =
     filter === "people"
       ? []
@@ -94,24 +81,6 @@ export function SearchResults({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2 overflow-x-auto">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            onClick={() => setFilter(f.value)}
-            className={cn(
-              "shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              filter === f.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground",
-            )}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
       {nothingFound && (
         <p className="text-muted-foreground">
           No results for &quot;{query}&quot;.
