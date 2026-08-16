@@ -4,6 +4,7 @@ import { searchMoviesAndTv } from "@/lib/media/tmdb";
 import { buildMediaHref } from "@/lib/media/href";
 import { HomeContent } from "@/components/home-content";
 import type { FeedEntry } from "@/components/feed-card";
+import type { CommentData } from "@/components/feed-actions";
 import type { PersonResult } from "@/components/people-results";
 
 type RawLogRow = {
@@ -122,6 +123,44 @@ export default async function Home({
     : { data: [] };
   const reviewByLogId = new Map((reviews ?? []).map((r) => [r.log_id, r.body]));
 
+  const { data: likeRows } = logIds.length
+    ? await supabase.from("likes").select("log_id, user_id").in("log_id", logIds)
+    : { data: [] };
+  const likeCountByLog = new Map<string, number>();
+  const likedByViewer = new Set<string>();
+  (likeRows ?? []).forEach((r) => {
+    likeCountByLog.set(r.log_id, (likeCountByLog.get(r.log_id) ?? 0) + 1);
+    if (r.user_id === user.id) likedByViewer.add(r.log_id);
+  });
+
+  const { data: commentRows } = logIds.length
+    ? await supabase
+        .from("comments")
+        .select("id, log_id, body, user:user_id(username, display_name)")
+        .in("log_id", logIds)
+        .order("created_at", { ascending: true })
+    : { data: [] };
+  const commentsByLog = new Map<string, CommentData[]>();
+  (
+    commentRows as
+      | {
+          id: string;
+          log_id: string;
+          body: string;
+          user: { username: string; display_name: string | null };
+        }[]
+      | null
+  )?.forEach((c) => {
+    const arr = commentsByLog.get(c.log_id) ?? [];
+    arr.push({
+      id: c.id,
+      body: c.body,
+      username: c.user.username,
+      displayName: c.user.display_name,
+    });
+    commentsByLog.set(c.log_id, arr);
+  });
+
   const mediaItemIds = [...new Set(logs.map((l) => l.media_item.id))];
   const { data: myLogs } = mediaItemIds.length
     ? await supabase
@@ -143,6 +182,9 @@ export default async function Home({
     media_item: log.media_item,
     mediaHref: buildMediaHref(log.media_item),
     isOnMyShelf: myShelfIds.has(log.media_item.id),
+    isLiked: likedByViewer.has(log.id),
+    likeCount: likeCountByLog.get(log.id) ?? 0,
+    comments: commentsByLog.get(log.id) ?? [],
   }));
 
   return (

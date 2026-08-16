@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { AddToShelfButton } from "@/components/add-to-shelf-button";
+import { FeedActions, type CommentData } from "@/components/feed-actions";
 import { statusVerbPhrase, type LogStatus } from "@/lib/media/status-labels";
 import type { MediaType } from "@/lib/media/types";
 
@@ -21,6 +22,9 @@ export type FeedEntry = {
   };
   mediaHref: string;
   isOnMyShelf: boolean;
+  isLiked: boolean;
+  likeCount: number;
+  comments: CommentData[];
 };
 
 export function FeedCard({
@@ -95,6 +99,14 @@ export function FeedCard({
           {entry.reviewBody}
         </p>
       )}
+
+      <FeedActions
+        logId={entry.id}
+        initialLiked={entry.isLiked}
+        initialLikeCount={entry.likeCount}
+        initialComments={entry.comments}
+        path="/"
+      />
     </div>
   );
 }
