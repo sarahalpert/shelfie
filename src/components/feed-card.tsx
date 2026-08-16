@@ -1,0 +1,82 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Avatar } from "@/components/avatar";
+
+export type FeedEntry = {
+  id: string;
+  rating: number | null;
+  status: string;
+  created_at: string;
+  reviewBody: string | null;
+  user: { username: string; display_name: string | null };
+  media_item: {
+    title: string;
+    type: string;
+    year: number | null;
+    image_url: string | null;
+  };
+  mediaHref: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  want: "wants to check out",
+  in_progress: "is in progress on",
+  done: "finished",
+};
+
+export function FeedCard({ entry }: { entry: FeedEntry }) {
+  return (
+    <div className="bg-card flex flex-col gap-3 rounded-2xl p-4">
+      <div className="flex items-center gap-3">
+        <Avatar username={entry.user.username} size="sm" />
+        <div className="flex flex-col leading-tight">
+          <Link
+            href={`/u/${entry.user.username}`}
+            className="text-sm font-medium"
+          >
+            {entry.user.display_name ?? entry.user.username}
+          </Link>
+          <span className="text-muted-foreground text-xs">
+            {STATUS_LABEL[entry.status] ?? entry.status}
+          </span>
+        </div>
+      </div>
+
+      <Link href={entry.mediaHref} className="flex gap-3">
+        <div className="bg-muted h-20 w-14 shrink-0 overflow-hidden rounded-lg">
+          {entry.media_item.image_url && (
+            <Image
+              src={entry.media_item.image_url}
+              alt={entry.media_item.title}
+              width={56}
+              height={80}
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-primary text-xs font-medium uppercase">
+            {entry.media_item.type}
+          </span>
+          <span className="font-medium leading-tight">
+            {entry.media_item.title}
+          </span>
+          {entry.rating && (
+            <span className="text-primary text-sm">
+              {"★".repeat(entry.rating)}
+              <span className="text-muted-foreground/30">
+                {"★".repeat(5 - entry.rating)}
+              </span>
+            </span>
+          )}
+        </div>
+      </Link>
+
+      {entry.reviewBody && (
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          {entry.reviewBody}
+        </p>
+      )}
+    </div>
+  );
+}

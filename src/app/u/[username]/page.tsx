@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Avatar } from "@/components/avatar";
+import { FollowButton } from "@/components/follow-button";
 
 type LoggedItem = {
   id: string;
@@ -30,6 +32,10 @@ export default async function ProfilePage({
 
   if (!profile) notFound();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: logs } = await supabase
     .from("log")
     .select(
@@ -50,17 +56,52 @@ export default async function ProfilePage({
         .in("log_id", logIds)
     : { count: 0 };
 
+  const { count: followerCount } = await supabase
+    .from("follow")
+    .select("follower_id", { count: "exact", head: true })
+    .eq("followee_id", profile.id);
+
+  const { count: followingCount } = await supabase
+    .from("follow")
+    .select("followee_id", { count: "exact", head: true })
+    .eq("follower_id", profile.id);
+
+  let isFollowing = false;
+  if (user && user.id !== profile.id) {
+    const { data: followRow } = await supabase
+      .from("follow")
+      .select("follower_id")
+      .eq("follower_id", user.id)
+      .eq("followee_id", profile.id)
+      .maybeSingle();
+    isFollowing = Boolean(followRow);
+  }
+
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-5">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">
-          {profile.display_name ?? profile.username}
-        </h1>
-        <p className="text-muted-foreground">@{profile.username}</p>
-        {profile.bio && <p className="mt-2">{profile.bio}</p>}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Avatar username={profile.username} />
+          <div>
+            <h1 className="font-heading text-2xl font-bold">
+              {profile.display_name ?? profile.username}
+            </h1>
+            <p className="text-muted-foreground">@{profile.username}</p>
+          </div>
+        </div>
+
+        {user && user.id !== profile.id && (
+          <FollowButton
+            followeeId={profile.id}
+            username={profile.username}
+            initialIsFollowing={isFollowing}
+          />
+        )}
       </div>
 
-      <div className="bg-card grid grid-cols-2 gap-2 rounded-2xl p-4">
+      {profile.bio && <p>{profile.bio}</p>}
+
+      <div className="bg-card grid grid-cols-4 gap-2 rounded-2xl p-4">
         <div className="flex flex-col items-center gap-1 py-2">
           <span className="font-heading text-primary text-xl font-bold">
             {finishedCount}
@@ -72,6 +113,18 @@ export default async function ProfilePage({
             {reviewCount ?? 0}
           </span>
           <span className="text-muted-foreground text-xs">Reviews</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 py-2">
+          <span className="font-heading text-primary text-xl font-bold">
+            {followingCount ?? 0}
+          </span>
+          <span className="text-muted-foreground text-xs">Following</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 py-2">
+          <span className="font-heading text-primary text-xl font-bold">
+            {followerCount ?? 0}
+          </span>
+          <span className="text-muted-foreground text-xs">Followers</span>
         </div>
       </div>
 
