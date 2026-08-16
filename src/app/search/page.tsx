@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { searchBooks } from "@/lib/media/openlibrary";
 import { searchMoviesAndTv } from "@/lib/media/tmdb";
 import { SearchResults } from "@/components/search-results";
-import { PeopleResults, type PersonResult } from "@/components/people-results";
+import type { PersonResult } from "@/components/people-results";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SearchPage({
@@ -75,9 +75,12 @@ export default async function SearchPage({
         </Button>
       </form>
 
-      <PeopleResults people={people} isLoggedIn={Boolean(user)} />
-
-      <SearchResults results={results} query={query} />
+      <SearchResults
+        results={results}
+        people={people}
+        isLoggedIn={Boolean(user)}
+        query={query}
+      />
     </div>
   );
 }
