@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { FeedCard, type FeedEntry } from "@/components/feed-card";
 import { buildMediaHref } from "@/lib/media/href";
+import { Logo } from "@/components/logo";
 
 function MarketingHero() {
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center gap-4 p-8 text-center">
-      <h1 className="font-heading text-3xl font-bold">
-        Shelfie<span className="text-primary">.</span>
-      </h1>
+      <Logo size="lg" />
       <p className="text-muted-foreground max-w-md">
         Rate and discuss books, movies, and TV with your friends.
       </p>

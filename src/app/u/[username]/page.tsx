@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/avatar";
 import { FollowButton } from "@/components/follow-button";
+import { statusLabel } from "@/lib/media/status-labels";
+import type { MediaType } from "@/lib/media/types";
 
 type LoggedItem = {
   id: string;
@@ -156,7 +158,10 @@ export default async function ProfilePage({
                 <span className="font-medium">{media.title}</span>
                 <span className="text-muted-foreground text-sm">
                   {log.rating ? `${log.rating}★ · ` : ""}
-                  {log.status.replace("_", " ")}
+                  {statusLabel(
+                    log.status as "want" | "in_progress" | "done",
+                    media.type as MediaType,
+                  )}
                 </span>
               </div>
             </div>

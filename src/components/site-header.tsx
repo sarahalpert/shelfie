@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logout } from "@/app/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
 export async function SiteHeader() {
   const supabase = await createClient();
@@ -11,9 +12,8 @@ export async function SiteHeader() {
 
   return (
     <header className="flex items-center justify-between px-5 py-4">
-      <Link href="/" className="font-heading text-xl font-bold">
-        Shelfie
-        <span className="text-primary">.</span>
+      <Link href="/">
+        <Logo />
       </Link>
       <nav className="flex items-center gap-3 text-sm">
         {user ? (

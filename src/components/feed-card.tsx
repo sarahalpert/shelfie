@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
+import { statusVerbPhrase, type LogStatus } from "@/lib/media/status-labels";
+import type { MediaType } from "@/lib/media/types";
 
 export type FeedEntry = {
   id: string;
@@ -18,12 +20,6 @@ export type FeedEntry = {
   mediaHref: string;
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  want: "wants to check out",
-  in_progress: "is in progress on",
-  done: "finished",
-};
-
 export function FeedCard({ entry }: { entry: FeedEntry }) {
   return (
     <div className="bg-card flex flex-col gap-3 rounded-2xl p-4">
@@ -37,7 +33,10 @@ export function FeedCard({ entry }: { entry: FeedEntry }) {
             {entry.user.display_name ?? entry.user.username}
           </Link>
           <span className="text-muted-foreground text-xs">
-            {STATUS_LABEL[entry.status] ?? entry.status}
+            {statusVerbPhrase(
+              entry.status as LogStatus,
+              entry.media_item.type as MediaType,
+            )}
           </span>
         </div>
       </div>

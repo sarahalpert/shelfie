@@ -132,6 +132,7 @@ export default async function MediaDetailPage({
         (user ? (
           <LogControl
             mediaItemId={mediaItemId}
+            mediaType={item.type}
             initialRating={existingLog?.rating ?? null}
             initialStatus={existingLog?.status ?? null}
             initialReview={existingLog?.review ?? ""}

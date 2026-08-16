@@ -4,30 +4,28 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { saveLog } from "@/app/actions/log";
 import { cn } from "@/lib/utils";
+import { statusLabel, type LogStatus } from "@/lib/media/status-labels";
+import type { MediaType } from "@/lib/media/types";
 
-const STATUSES = [
-  { value: "want", label: "Want to" },
-  { value: "in_progress", label: "In progress" },
-  { value: "done", label: "Done" },
-] as const;
-
-type Status = (typeof STATUSES)[number]["value"];
+const STATUS_VALUES: LogStatus[] = ["want", "in_progress", "done"];
 
 export function LogControl({
   mediaItemId,
+  mediaType,
   initialRating,
   initialStatus,
   initialReview,
   path,
 }: {
   mediaItemId: string;
+  mediaType: MediaType;
   initialRating: number | null;
-  initialStatus: Status | null;
+  initialStatus: LogStatus | null;
   initialReview: string;
   path: string;
 }) {
   const [rating, setRating] = useState(initialRating);
-  const [status, setStatus] = useState<Status>(initialStatus ?? "done");
+  const [status, setStatus] = useState<LogStatus>(initialStatus ?? "done");
   const [review, setReview] = useState(initialReview);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
@@ -64,22 +62,22 @@ export function LogControl({
       </div>
 
       <div className="flex gap-2">
-        {STATUSES.map((s) => (
+        {STATUS_VALUES.map((value) => (
           <button
-            key={s.value}
+            key={value}
             type="button"
             onClick={() => {
-              setStatus(s.value);
+              setStatus(value);
               setSaved(false);
             }}
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
-              status === s.value
+              status === value
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-secondary-foreground",
             )}
           >
-            {s.label}
+            {statusLabel(value, mediaType)}
           </button>
         ))}
       </div>
