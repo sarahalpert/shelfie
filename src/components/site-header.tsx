@@ -9,36 +9,32 @@ export async function SiteHeader() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let username: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .single();
-    username = profile?.username ?? null;
-  }
-
   return (
-    <header className="flex items-center justify-between border-b p-4">
-      <Link href="/" className="font-semibold">
-        shelfie
+    <header className="flex items-center justify-between px-5 py-4">
+      <Link href="/" className="font-heading text-xl font-bold">
+        Shelfie
+        <span className="text-primary">.</span>
       </Link>
-      <nav className="flex items-center gap-4 text-sm">
-        <Link href="/search">Search</Link>
+      <nav className="flex items-center gap-3 text-sm">
         {user ? (
-          <>
-            {username && <Link href={`/u/${username}`}>Profile</Link>}
-            <form action={logout}>
-              <Button type="submit" variant="ghost" size="sm">
-                Log out
-              </Button>
-            </form>
-          </>
+          <form action={logout}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+            >
+              Log out
+            </Button>
+          </form>
         ) : (
           <>
-            <Link href="/login">Log in</Link>
-            <Link href="/signup">Sign up</Link>
+            <Link href="/login" className="text-muted-foreground">
+              Log in
+            </Link>
+            <Button size="sm" nativeButton={false} render={<Link href="/signup" />}>
+              Sign up
+            </Button>
           </>
         )}
       </nav>

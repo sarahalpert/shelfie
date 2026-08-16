@@ -11,25 +11,34 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-4 p-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Log in</h1>
+    <div className="mx-auto flex max-w-sm flex-col gap-4 p-5">
+      <h1 className="font-heading text-2xl font-bold">Log in</h1>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
 
       <form action={login} className="flex flex-col gap-3">
-        <Input type="email" name="email" placeholder="Email" required />
+        <Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+          className="rounded-full"
+        />
         <Input
           type="password"
           name="password"
           placeholder="Password"
           required
+          className="rounded-full"
         />
-        <Button type="submit">Log in</Button>
+        <Button type="submit" className="rounded-full">
+          Log in
+        </Button>
       </form>
 
       <p className="text-muted-foreground text-sm">
         No account?{" "}
-        <Link href="/signup" className="underline">
+        <Link href="/signup" className="text-primary underline">
           Sign up
         </Link>
       </p>

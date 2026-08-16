@@ -97,9 +97,9 @@ export default async function MediaDetailPage({
     : [];
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-8">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-5">
       <div className="flex gap-6">
-        <div className="bg-muted h-60 w-40 shrink-0 overflow-hidden rounded-lg">
+        <div className="bg-muted h-60 w-40 shrink-0 overflow-hidden rounded-2xl">
           {item.imageUrl && (
             <Image
               src={item.imageUrl}
@@ -112,12 +112,10 @@ export default async function MediaDetailPage({
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase text-muted-foreground">
+          <span className="text-primary text-xs font-medium uppercase">
             {item.type}
           </span>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {item.title}
-          </h1>
+          <h1 className="font-heading text-2xl font-bold">{item.title}</h1>
           {item.year && (
             <span className="text-muted-foreground">{item.year}</span>
           )}
@@ -140,8 +138,8 @@ export default async function MediaDetailPage({
             path={`/media/${type}/${id}`}
           />
         ) : (
-          <p className="text-muted-foreground text-sm">
-            <Link href="/login" className="underline">
+          <p className="text-muted-foreground bg-card rounded-2xl p-4 text-sm">
+            <Link href="/login" className="text-primary underline">
               Log in
             </Link>{" "}
             to add this to your shelf.

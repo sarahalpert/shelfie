@@ -39,14 +39,40 @@ export default async function ProfilePage({
     .order("created_at", { ascending: false })
     .returns<LoggedItem[]>();
 
+  const finishedCount =
+    logs?.filter((log) => log.status === "done").length ?? 0;
+
+  const logIds = logs?.map((log) => log.id) ?? [];
+  const { count: reviewCount } = logIds.length
+    ? await supabase
+        .from("review")
+        .select("id", { count: "exact", head: true })
+        .in("log_id", logIds)
+    : { count: 0 };
+
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-8">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="font-heading text-2xl font-bold">
           {profile.display_name ?? profile.username}
         </h1>
         <p className="text-muted-foreground">@{profile.username}</p>
         {profile.bio && <p className="mt-2">{profile.bio}</p>}
+      </div>
+
+      <div className="bg-card grid grid-cols-2 gap-2 rounded-2xl p-4">
+        <div className="flex flex-col items-center gap-1 py-2">
+          <span className="font-heading text-primary text-xl font-bold">
+            {finishedCount}
+          </span>
+          <span className="text-muted-foreground text-xs">Finished</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 py-2">
+          <span className="font-heading text-primary text-xl font-bold">
+            {reviewCount ?? 0}
+          </span>
+          <span className="text-muted-foreground text-xs">Reviews</span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -57,9 +83,9 @@ export default async function ProfilePage({
           return (
             <div
               key={log.id}
-              className="flex items-center gap-4 rounded-lg border p-3"
+              className="bg-card flex items-center gap-4 rounded-2xl p-3"
             >
-              <div className="bg-muted h-16 w-11 shrink-0 overflow-hidden rounded">
+              <div className="bg-muted h-16 w-11 shrink-0 overflow-hidden rounded-lg">
                 {media.image_url && (
                   <Image
                     src={media.image_url}
@@ -71,7 +97,7 @@ export default async function ProfilePage({
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-medium uppercase text-muted-foreground">
+                <span className="text-primary text-xs font-medium uppercase">
                   {media.type}
                 </span>
                 <span className="font-medium">{media.title}</span>

@@ -40,7 +40,7 @@ export function LogControl({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border p-4">
+    <div className="bg-card flex flex-col gap-4 rounded-2xl p-4">
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -54,7 +54,7 @@ export function LogControl({
             className={cn(
               "text-2xl leading-none",
               rating && star <= rating
-                ? "text-foreground"
+                ? "text-primary"
                 : "text-muted-foreground/30",
             )}
           >
@@ -73,8 +73,10 @@ export function LogControl({
               setSaved(false);
             }}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs",
-              status === s.value && "bg-foreground text-background",
+              "rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+              status === s.value
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground",
             )}
           >
             {s.label}
@@ -89,10 +91,10 @@ export function LogControl({
           setSaved(false);
         }}
         placeholder="Write a review (optional)"
-        className="min-h-20 rounded-md border p-2 text-sm"
+        className="bg-input/20 min-h-20 rounded-xl border-0 p-3 text-sm outline-none focus:ring-2 focus:ring-primary"
       />
 
-      <Button onClick={handleSave} disabled={isPending}>
+      <Button onClick={handleSave} disabled={isPending} className="rounded-full">
         {isPending ? "Saving..." : saved ? "Saved" : "Save"}
       </Button>
     </div>

@@ -11,27 +11,42 @@ export default async function SignupPage({
   const { error } = await searchParams;
 
   return (
-    <div className="mx-auto flex max-w-sm flex-col gap-4 p-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Sign up</h1>
+    <div className="mx-auto flex max-w-sm flex-col gap-4 p-5">
+      <h1 className="font-heading text-2xl font-bold">Sign up</h1>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
 
       <form action={signup} className="flex flex-col gap-3">
-        <Input type="text" name="username" placeholder="Username" required />
-        <Input type="email" name="email" placeholder="Email" required />
+        <Input
+          type="text"
+          name="username"
+          placeholder="Username"
+          required
+          className="rounded-full"
+        />
+        <Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          required
+          className="rounded-full"
+        />
         <Input
           type="password"
           name="password"
           placeholder="Password"
           minLength={6}
           required
+          className="rounded-full"
         />
-        <Button type="submit">Sign up</Button>
+        <Button type="submit" className="rounded-full">
+          Sign up
+        </Button>
       </form>
 
       <p className="text-muted-foreground text-sm">
         Already have an account?{" "}
-        <Link href="/login" className="underline">
+        <Link href="/login" className="text-primary underline">
           Log in
         </Link>
       </p>
