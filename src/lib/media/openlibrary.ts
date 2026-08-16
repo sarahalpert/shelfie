@@ -42,9 +42,14 @@ export async function searchBooks(query: string): Promise<MediaItemData[]> {
     "key,title,author_name,first_publish_year,cover_i",
   );
 
-  const res = await fetchWithRetry(url, { next: { revalidate: 3600 } });
-  if (!res.ok) return [];
+  try {
+    const res = await fetchWithRetry(url, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
 
-  const data: OpenLibrarySearchResponse = await res.json();
-  return data.docs.map(toMediaItem);
+    const data: OpenLibrarySearchResponse = await res.json();
+    return data.docs.map(toMediaItem);
+  } catch (error) {
+    console.error("Open Library search failed:", error);
+    return [];
+  }
 }

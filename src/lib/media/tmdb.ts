@@ -34,13 +34,18 @@ async function tmdbFetch<T>(path: string): Promise<T | null> {
   const token = process.env.TMDB_READ_ACCESS_TOKEN;
   if (!token) return null;
 
-  const res = await fetchWithRetry(`${API_BASE}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) return null;
+  try {
+    const res = await fetchWithRetry(`${API_BASE}${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
 
-  return res.json() as Promise<T>;
+    return (await res.json()) as T;
+  } catch (error) {
+    console.error("TMDB request failed:", error);
+    return null;
+  }
 }
 
 function movieToMediaItem(movie: TmdbMovie): MediaItemData {
