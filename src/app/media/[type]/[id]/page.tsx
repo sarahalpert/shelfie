@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTmdbDetail } from "@/lib/media/tmdb";
-import { getOpenLibraryDetail } from "@/lib/media/openlibrary";
+import { getGoogleBooksDetail } from "@/lib/media/googlebooks";
 import { upsertMediaItem } from "@/lib/media/cache";
 import { MediaItemData, MediaType } from "@/lib/media/types";
 import { createClient } from "@/lib/supabase/server";
@@ -20,7 +20,7 @@ function isTmdbType(type: string): type is Extract<MediaType, "movie" | "tv"> {
 
 async function loadItem(type: string, id: string): Promise<MediaItemData | null> {
   if (isTmdbType(type)) return getTmdbDetail(type, id);
-  if (type === "book") return getOpenLibraryDetail(id);
+  if (type === "book") return getGoogleBooksDetail(id);
   return null;
 }
 

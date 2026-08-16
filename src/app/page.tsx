@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { searchBooks } from "@/lib/media/openlibrary";
+import { searchBooks } from "@/lib/media/googlebooks";
 import { searchMoviesAndTv } from "@/lib/media/tmdb";
 import { buildMediaHref } from "@/lib/media/href";
 import { HomeContent } from "@/components/home-content";

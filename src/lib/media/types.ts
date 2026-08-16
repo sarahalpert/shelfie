@@ -1,5 +1,5 @@
 export type MediaType = "book" | "movie" | "tv";
-export type ExternalSource = "tmdb" | "openlibrary";
+export type ExternalSource = "tmdb" | "googlebooks";
 
 export type MediaItemData = {
   type: MediaType;
